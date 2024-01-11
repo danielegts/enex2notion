@@ -3,19 +3,16 @@ import sys
 from pathlib import Path
 from typing import List
 
-from enex2notion.cli_args import parse_args
 from enex2notion.cli_logging import setup_logging
 from enex2notion.cli_notion import get_root
 from enex2notion.cli_upload import EnexUploader
 from enex2notion.cli_wkhtmltopdf import ensure_wkhtmltopdf
 from enex2notion.utils_static import Rules
+from enex2notion.cli_args import args
 
 logger = logging.getLogger(__name__)
 
-
-def cli(argv):
-    args = parse_args(argv)
-
+def cli():
     rules = Rules.from_args(args)
 
     setup_logging(args.verbose, args.log)
@@ -44,6 +41,6 @@ def _process_input(enex_uploader: EnexUploader, enex_input: List[Path]):
 
 def main():  # pragma: no cover
     try:
-        cli(sys.argv[1:])
+        cli()
     except KeyboardInterrupt:
         sys.exit(1)

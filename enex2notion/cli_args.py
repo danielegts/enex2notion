@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+import sys
 
 from enex2notion.version import __version__
 
@@ -27,6 +28,18 @@ def parse_args(argv):
             "help": (
                 "Notion token, stored in token_v2 cookie for notion.so"
                 " [NEEDED FOR UPLOAD]"
+            ),
+        },
+        "--links-dict": {
+            "help": (
+                "path to json dictionary object mapping evernote links to note titles"
+                " [NEEDED FOR INTERNAL LINKS RESOLUTION]"
+            ),
+        },
+        "--notion-api-secret": {
+            "help": (
+                "Notion API secret"
+                " [NEEDED FOR INTERNAL LINKS RESOLUTION]"
             ),
         },
         "--root-page": {
@@ -131,3 +144,5 @@ def parse_args(argv):
         parser.add_argument(arg, **arg_params)
 
     return parser.parse_args(argv)
+
+args = parse_args(sys.argv[1:])

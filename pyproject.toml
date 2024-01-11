@@ -43,6 +43,7 @@ PyMuPDF = "^1.23.5"
 notion-vzhd1701-fork = "0.0.37"
 tqdm = "^4.66.1"
 lxml = "^4.9.3"
+notion-client = "^2.2.1"
 
 [tool.poetry.group.test]
 optional = true
