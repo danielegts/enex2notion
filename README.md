@@ -20,6 +20,7 @@ You can either use Evernote native export or try out my other tool, [evernote-ba
 - Web Clips
   - as plain text or PDFs, see [below](#web-clips)
 - Everything else basically
+- Internal links
 
 ### What is lost
 
@@ -56,8 +57,8 @@ $ pipx install enex2notion
 
 ### With [**Docker**](https://docs.docker.com/)
 
-[![Docker Image Size (amd64)](<https://img.shields.io/docker/image-size/vzhd1701/enex2notion?arch=amd64&label=image%20size%20(amd64)>)](https://hub.docker.com/r/vzhd1701/enex2notion)
-[![Docker Image Size (arm64)](<https://img.shields.io/docker/image-size/vzhd1701/enex2notion?arch=arm64&label=image%20size%20(arm64)>)](https://hub.docker.com/r/vzhd1701/enex2notion)
+[![Docker Image Size (amd64)](https://img.shields.io/docker/image-size/vzhd1701/enex2notion?arch=amd64&label=image%20size%20(amd64))](https://hub.docker.com/r/vzhd1701/enex2notion)
+[![Docker Image Size (arm64)](https://img.shields.io/docker/image-size/vzhd1701/enex2notion?arch=arm64&label=image%20size%20(arm64))](https://hub.docker.com/r/vzhd1701/enex2notion)
 
 This command maps current directory `$PWD` to the `/input` directory in the container. You can replace `$PWD` with a directory that contains your `*.enex` files. When running commands like `enex2notion /input` refer to your local mapped directory as `/input`.
 
@@ -87,6 +88,7 @@ $ poetry run enex2notion
 ## Usage
 
 ```shell
+
 $ enex2notion --help
 usage: enex2notion [-h] [--token TOKEN] [OPTION ...] FILE/DIR [FILE/DIR ...]
 
@@ -98,6 +100,9 @@ positional arguments:
 optional arguments:
   -h, --help                 show this help message and exit
   --token TOKEN              Notion token, stored in token_v2 cookie for notion.so [NEEDED FOR UPLOAD]
+  --links-dict LINKS_DICT    path to json dictionary object mapping evernote links to note titles [NEEDED FOR INTERNAL LINKS
+                             RESOLUTION]
+  --notion-api-secret NOTION_API_SECRET Notion API secret [NEEDED FOR INTERNAL LINKS RESOLUTION]
   --root-page NAME           root page name for the imported notebooks, it will be created if it does not exist (default: "Evernote ENEX Import")
   --mode {DB,PAGE}           upload each ENEX as database (DB) or page with children (PAGE) (default: DB)
   --mode-webclips {TXT,PDF}  convert web clips to text (TXT) or pdf (PDF) before upload (default: TXT)
@@ -144,12 +149,32 @@ Due to Notion's limitations Evernote web clips cannot be uploaded as-is. `enex2n
 - `TXT`, converting them to text, stripping all HTML formatting \[Default\]
 
   - similar to Evernote's "Simplify & Make Editable"
-
 - `PDF`, converting them to PDF, keeping HTML formatting as close as possible
 
   - web clips are converted using [wkhtmltopdf](https://wkhtmltopdf.org/), see [this page](https://github.com/JazzCore/python-pdfkit/wiki/Installing-wkhtmltopdf) on how to install it
 
 Since Notion's gallery view does not provide thumbnails for embedded PDFs, you have the `--add-pdf-preview` option to extract the first page of generated PDF as a preview for the web clip page.
+
+### Internal links
+
+If your note contains an internal link to another note, the tool uses the dictionary you provided to find the note title. Here you can see the structure of this dictionary:
+
+```
+{
+	evernote_url_1 : title_1,
+	evernote_url_2 : title_2,
+	evernote_url_3 : title_3,
+	...
+}
+```
+
+Then the title is used to search the correspondent Notion url using Notion API. It is important that the referred note has already been uploaded, so notes in your enex file must be downloaded in chronological order (just order by creation date before exporting).
+
+An easy way to create the urls-titles dictionary is to download an older Evernote version (e.g. 1.57.6), in which you can avoid the maximum number of selected notes limitation. With this you can select all the notes in the notebook and get the internal links. Then you copy those links in a new note and you export it in html. You can then use this regular expression to extract the list of url and titles:
+
+```
+(?<link>evernote:\/\/.*)" rel="noopener noreferrer" rev="en_rl_none" class="en-link en-internal-link">(?<title>.*)<\/a>
+```
 
 ### Banned file extensions
 

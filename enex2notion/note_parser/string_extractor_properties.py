@@ -112,8 +112,13 @@ def _get_evernote_title(evernote_url):
         return translation_dict[evernote_url]
     else:
         evernote_id = evernote_url.split("/")[-2].lower()
-        return [
+        matches = [
             value
             for key, value in translation_dict.items()
             if evernote_id in key.lower()
-        ][0]
+        ]
+
+        if len(matches) == 1:
+            return matches[0]
+        else:
+            raise f"Multiple match found for note: {evernote_url}"
